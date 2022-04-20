@@ -6,6 +6,80 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
 ```
 
-Stuff
+```{r}
+red <- read.csv("winequality-red.csv")
+white <- read.csv("winequality-white.csv")
+red$color = "red"
+white$color = "white"
+wines <- rbind(red, white)
+```
+
+```{r}
+ggplot(wines, aes(alcohol, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(pH, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(fixed.acidity, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(volatile.acidity, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(citric.acid, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(residual.sugar, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(chlorides, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(free.sulfur.dioxide, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(total.sulfur.dioxide, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(density, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(sulphates, fill = color)) + geom_density(alpha = 0.2)
+```
+
+```{r}
+mean(red$total.sulfur.dioxide)
+mean(white$total.sulfur.dioxide)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
