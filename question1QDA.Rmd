@@ -1,0 +1,49 @@
+---
+title: "Question 1 QDA"
+output: html_notebook
+---
+
+
+```{r}
+library(dplyr)
+library(ISLR2)
+library(MASS)
+
+set.seed(1)
+```
+
+```{r}
+# Setup data frames
+red <- read.csv("winequality-red.csv")
+white <- read.csv("winequality-white.csv")
+white <- white[!(white$quality == 9),] # remove occurrences where quality is 9
+
+red$newquality <- with(red, ifelse(quality > 6, 'great',
+                                   ifelse(quality > 4, 'good', 'bad')))
+
+white$newquality <- with(white, ifelse(quality > 6, 'great',
+                                   ifelse(quality > 4, 'good', 'bad')))
+
+
+red <- subset(red, select = -c(quality))
+white <- subset(white, select = -c(quality))
+
+```
+
+```{r}
+# RED QDA
+train = sample(1:dim(red)[1], 1000, replace=FALSE)
+qda.fit = qda(newquality~.,data=red, subset=train)
+qda.pred = predict(qda.fit,red[-train,])
+
+table(qda.pred$class,red[-train,]$newquality)
+mean(qda.pred$class==red[-train,]$newquality)
+
+# WHITE QDA
+train = sample(1:dim(white)[1], 1000, replace=FALSE)
+qda.fit = qda(newquality~.,data=white, subset=train)
+qda.pred = predict(qda.fit,white[-train,])
+
+table(qda.pred$class,white[-train,]$newquality)
+mean(qda.pred$class==white[-train,]$newquality)
+```
