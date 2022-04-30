@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(caret)
 library(MASS)
+library(class)
 ```
 
 # KNN Red Whine
@@ -20,43 +21,47 @@ red$newquality <- with(red, ifelse(quality > 6, 'great',
                             ifelse(quality > 4, 'good', 'bad')))
 
 red <- subset(red, select = -c(quality))
-set.seed(1)
-test = sample(1:dim(red)[1], 200, replace=FALSE)
+numruns <- 50
+folds <- rep(0, 5)
+K = c(1,3,5,7,9) 
 
-standardized.X = scale(red[,-dim(red)[2]])
-
-train.X = standardized.X[-test,]
-test.X = standardized.X[test,]
-train.Y = red$newquality[-test]
-test.Y = red$newquality[test]
-
-red2 = red[-test,]
-standardized.X2 = scale(red2[,-dim(red2)[2]])
-
-flds <- createFolds(red2$newquality, k = 5, list = TRUE, returnTrain = FALSE)
-
-K= c(1,3,5,7,9) 
-
-cv_error = matrix(NA, 5, length(K))
-
-for(j in 1:length(K)) {
-  k = K[j]
-  for(i in 1:5){
-    test_index = flds[[i]]
-    testX = standardized.X2[test_index,]
-    trainX = standardized.X2[-test_index,]
-    
-    trainY = red2$newquality[-test_index]
-    testY = red2$newquality[test_index]
-    
-    knn.pred = knn(trainX,testX,trainY,k=k)
-    cv_error[i,j] = mean(testY!=knn.pred)
+for (i in 1:numruns) {
+  test = sample(1:dim(red)[1], 200, replace=FALSE)
+  
+  standardized.X = scale(red[,-dim(red)[2]])
+  
+  train.X = standardized.X[-test,]
+  test.X = standardized.X[test,]
+  train.Y = red$newquality[-test]
+  test.Y = red$newquality[test]
+  
+  red2 = red[-test,]
+  standardized.X2 = scale(red2[,-dim(red2)[2]])
+  
+  flds <- createFolds(red2$newquality, k = 5, list = TRUE, returnTrain = FALSE)
+  
+  cv_error = matrix(NA, 5, length(K))
+  
+  for(j in 1:length(K)) {
+    k = K[j]
+    for(i in 1:5){
+      test_index = flds[[i]]
+      testX = standardized.X2[test_index,]
+      trainX = standardized.X2[-test_index,]
+      
+      trainY = red2$newquality[-test_index]
+      testY = red2$newquality[test_index]
+      
+      knn.pred = knn(trainX,testX,trainY,k=k)
+      cv_error[i,j] = mean(testY!=knn.pred)
+    }
   }
+  
+  best <- which.min(apply(cv_error, 2, mean))
+  folds[best] = folds[best] + 1
 }
 
-apply(cv_error,2,mean)
-
-knn.pred = knn(train.X,test.X,train.Y,k=1)
+knn.pred = knn(train.X, test.X, train.Y,k=K[which.max(folds)])
 table(knn.pred,test.Y)
 1 - mean(test.Y!=knn.pred)
 ```
@@ -70,42 +75,45 @@ white$newquality <- with(white, ifelse(quality > 6, 'great',
                             ifelse(quality > 4, 'good', 'bad')))
 
 white <- subset(white, select = -c(quality))
-test = sample(1:dim(white)[1], 600, replace=FALSE)
+folds <- rep(0, 5)
 
-standardized.X = scale(white[,-dim(white)[2]])
-
-train.X = standardized.X[-test,]
-test.X = standardized.X[test,]
-train.Y = white$newquality[-test]
-test.Y = white$newquality[test]
-
-white2 = white[-test,]
-standardized.X2 = scale(white2[,-dim(white2)[2]])
-
-flds <- createFolds(white2$newquality, k = 5, list = TRUE, returnTrain = FALSE)
-
-K= c(1,3,5,7,9) 
-
-cv_error = matrix(NA, 5, length(K))
-
-for(j in 1:length(K)) {
-  k = K[j]
-  for(i in 1:5){
-    test_index = flds[[i]]
-    testX = standardized.X2[test_index,]
-    trainX = standardized.X2[-test_index,]
-    
-    trainY = white2$newquality[-test_index]
-    testY = white2$newquality[test_index]
-    
-    knn.pred = knn(trainX,testX,trainY,k=k)
-    cv_error[i,j] = mean(testY!=knn.pred)
+for (i in 1:numruns) {
+  test = sample(1:dim(white)[1], 600, replace=FALSE)
+  
+  standardized.X = scale(white[,-dim(white)[2]])
+  
+  train.X = standardized.X[-test,]
+  test.X = standardized.X[test,]
+  train.Y = white$newquality[-test]
+  test.Y = white$newquality[test]
+  
+  white2 = white[-test,]
+  standardized.X2 = scale(white2[,-dim(white2)[2]])
+  
+  flds <- createFolds(white2$newquality, k = 5, list = TRUE, returnTrain = FALSE)
+  
+  cv_error = matrix(NA, 5, length(K))
+  
+  for(j in 1:length(K)) {
+    k = K[j]
+    for(i in 1:5){
+      test_index = flds[[i]]
+      testX = standardized.X2[test_index,]
+      trainX = standardized.X2[-test_index,]
+      
+      trainY = white2$newquality[-test_index]
+      testY = white2$newquality[test_index]
+      
+      knn.pred = knn(trainX,testX,trainY,k=k)
+      cv_error[i,j] = mean(testY!=knn.pred)
+    }
   }
+  
+  best <- which.min(apply(cv_error, 2, mean))
+  folds[best] = folds[best] + 1
 }
 
-apply(cv_error,2,mean)
-
-knn.pred = knn(train.X,test.X,train.Y,k=1)
+knn.pred = knn(train.X,test.X,train.Y,k=K[which.max(folds)])
 table(knn.pred,test.Y)
 1 - mean(test.Y!=knn.pred)
 ```
