@@ -1,0 +1,42 @@
+---
+title: 'DS301: Final'
+author: "MyTien Kien"
+date: "4/28/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r data, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(ISLR2)
+library(MASS)
+red <- read.csv("./winequality-red.csv", header=TRUE)
+white <- read.csv("./winequality-white.csv", header=TRUE)
+
+red$color = "red"
+white$color = "white"
+wines <- rbind(red, white)
+wines$color = as.factor(wines$color)
+```
+
+### Question 2, Method 2: LDA
+#### *Can we try to predict wine color based on the characteristics?*
+```{r}
+#usual lda
+#maybe get an even number of observations from each set?
+train = sample(1:dim(wines)[1], dim(wines)[1]/2, replace=FALSE)
+test = wines[-train,]
+
+lda.fit = lda(color~., data=wines, subset=train)
+lda.pred = predict(lda.fit, test)
+
+lda.fit
+head(lda.pred$class)
+
+#misclassification rate of 0.4% 
+table(lda.pred$class, test$color)
+mean(lda.pred$class != test$color)
+```
