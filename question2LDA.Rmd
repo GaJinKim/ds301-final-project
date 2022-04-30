@@ -25,8 +25,6 @@ wines$color = as.factor(wines$color)
 ### Question 2, Method 2: LDA
 #### *Can we try to predict wine color based on the characteristics?*
 ```{r}
-#usual lda
-#maybe get an even number of observations from each set?
 train = sample(1:dim(wines)[1], dim(wines)[1]/2, replace=FALSE)
 test = wines[-train,]
 
@@ -37,6 +35,19 @@ lda.fit
 head(lda.pred$class)
 
 #misclassification rate of 0.4% 
+table(lda.pred$class, test$color)
+mean(lda.pred$class != test$color)
+```
+
+```{r}
+#performing lda on char. that differs white wine between red
+lda.fit = lda(color~chlorides+volatile.acidity+total.sulfur.dioxide+density, data=wines, subset=train)
+lda.pred = predict(lda.fit, test)
+
+lda.fit
+head(lda.pred$class)
+
+#misclassification rate of 2.4% 
 table(lda.pred$class, test$color)
 mean(lda.pred$class != test$color)
 ```

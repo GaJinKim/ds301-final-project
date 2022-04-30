@@ -220,34 +220,34 @@ lda.fit</code></pre>
 ## lda(color ~ ., data = wines, subset = train)
 ## 
 ## Prior probabilities of groups:
-##       red     white 
-## 0.2536946 0.7463054 
+##      red    white 
+## 0.242303 0.757697 
 ## 
 ## Group means:
 ##       fixed.acidity volatile.acidity citric.acid residual.sugar  chlorides
-## red        8.333010        0.5288289   0.2716869       2.569296 0.08741990
-## white      6.837521        0.2801238   0.3358663       6.274402 0.04610396
+## red        8.344091        0.5244727   0.2657306       2.555083 0.08541931
+## white      6.845551        0.2796384   0.3337383       6.419057 0.04576595
 ##       free.sulfur.dioxide total.sulfur.dioxide   density       pH sulphates
-## red              16.09102             46.32524 0.9967617 3.307985 0.6596481
-## white            35.63923            139.15656 0.9939823 3.187933 0.4893276
+## red              15.64168             45.59784 0.9967447 3.311741 0.6538628
+## white            35.22430            138.42686 0.9940089 3.185006 0.4874076
 ##        alcohol  quality
-## red   10.41535 5.660194
-## white 10.51657 5.870462
+## red   10.44873 5.642948
+## white 10.52672 5.891101
 ## 
 ## Coefficients of linear discriminants:
 ##                                LD1
-## fixed.acidity         5.095923e-01
-## volatile.acidity     -3.002336e+00
-## citric.acid           6.687080e-01
-## residual.sugar        4.065315e-01
-## chlorides            -4.113260e+00
-## free.sulfur.dioxide  -1.813138e-02
-## total.sulfur.dioxide  1.989476e-02
-## density              -1.109397e+03
-## pH                    1.862229e+00
-## sulphates            -3.447679e-01
-## alcohol              -1.051116e+00
-## quality              -1.088947e-01</code></pre>
+## fixed.acidity           0.16872553
+## volatile.acidity       -3.13414819
+## citric.acid             0.95392453
+## residual.sugar          0.30759601
+## chlorides              -7.21316841
+## free.sulfur.dioxide    -0.01851187
+## total.sulfur.dioxide    0.01931476
+## density              -759.92549130
+## pH                      0.49102968
+## sulphates              -0.96840485
+## alcohol                -0.63129972
+## quality                -0.10237448</code></pre>
 <pre class="r"><code>head(lda.pred$class)</code></pre>
 <pre><code>## [1] red red red red red red
 ## Levels: red white</code></pre>
@@ -255,10 +255,45 @@ lda.fit</code></pre>
 table(lda.pred$class, test$color)</code></pre>
 <pre><code>##        
 ##          red white
-##   red    768    10
-##   white    7  2464</code></pre>
+##   red    802     4
+##   white   10  2433</code></pre>
 <pre class="r"><code>mean(lda.pred$class != test$color)</code></pre>
-<pre><code>## [1] 0.005232379</code></pre>
+<pre><code>## [1] 0.004309018</code></pre>
+<pre class="r"><code>#performing lda on char. that differs white wine between red
+lda.fit = lda(color~chlorides+volatile.acidity+total.sulfur.dioxide+density, data=wines, subset=train)
+lda.pred = predict(lda.fit, test)
+
+lda.fit</code></pre>
+<pre><code>## Call:
+## lda(color ~ chlorides + volatile.acidity + total.sulfur.dioxide + 
+##     density, data = wines, subset = train)
+## 
+## Prior probabilities of groups:
+##      red    white 
+## 0.242303 0.757697 
+## 
+## Group means:
+##        chlorides volatile.acidity total.sulfur.dioxide   density
+## red   0.08541931        0.5244727             45.59784 0.9967447
+## white 0.04576595        0.2796384            138.42686 0.9940089
+## 
+## Coefficients of linear discriminants:
+##                                LD1
+## chlorides             -12.17509688
+## volatile.acidity       -4.12333374
+## total.sulfur.dioxide    0.02218789
+## density              -197.63758810</code></pre>
+<pre class="r"><code>head(lda.pred$class)</code></pre>
+<pre><code>## [1] red red red red red red
+## Levels: red white</code></pre>
+<pre class="r"><code>#misclassification rate of 2.4% 
+table(lda.pred$class, test$color)</code></pre>
+<pre><code>##        
+##          red white
+##   red    769    28
+##   white   43  2409</code></pre>
+<pre class="r"><code>mean(lda.pred$class != test$color)</code></pre>
+<pre><code>## [1] 0.02185288</code></pre>
 </div>
 </div>
 
