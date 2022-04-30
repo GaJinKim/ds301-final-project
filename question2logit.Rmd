@@ -1,0 +1,133 @@
+---
+title: "Final Project"
+author: "Emily Pollock"
+date: "4/20/2022"
+output: html_document
+---
+
+```{r, echo=FALSE}
+red <- read.csv('~/Desktop/DS301/winequality-red.csv',header=TRUE)
+white <- read.csv('~/Desktop/DS301/winequality-white.csv',header=TRUE)
+red$color = "red"
+white$color = "white"
+wines <- rbind(red, white)
+```
+
+```{r, echo=FALSE}
+head(red)
+```
+
+```{r, echo=FALSE}
+head(white)
+```
+
+
+```{r, echo=FALSE}
+head(wines)
+```
+
+```{r, echo=FALSE}
+table(wines$color)
+```
+
+```{r, echo=FALSE}
+library(MASS) 
+```
+
+```{r, echo=FALSE}
+set.seed(1)
+train = sample(1:nrow(wines),nrow(wines)/2, replace=FALSE)
+test = (-train)
+```
+
+```{r, echo=FALSE}
+library(ggplot2)
+
+ggplot(wines, aes(alcohol, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(pH, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(fixed.acidity, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(volatile.acidity, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(citric.acid, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(residual.sugar, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(chlorides, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(free.sulfur.dioxide, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(total.sulfur.dioxide, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(density, fill = color)) + geom_density(alpha = 0.2)
+ggplot(wines, aes(sulphates, fill = color)) + geom_density(alpha = 0.2)
+```
+
+```{r, echo=FALSE}
+wines$color <- as.factor(wines$color)
+head(wines)
+```
+```{r, echo=FALSE}
+contrasts(wines$color)
+```
+
+```{r, echo=FALSE}
+wines.fit = glm(color~chlorides+volatile.acidity+total.sulfur.dioxide+density,data=wines,subset=train,family='binomial')
+
+#train logistic model on training set with selected predictors
+```
+
+```{r, echo=FALSE}
+summary(wines.fit)
+head(wines.fit$fitted.values)
+head(wines[train,])
+```
+
+All of the predictors are statistically significant at alpha = 0.05
+
+```{r, echo=FALSE}
+wines.prob = predict(wines.fit,wines[test,],type='response') 
+head(wines.prob)
+head(wines[test,])
+```
+
+The predicted probabilities are close to zero, indicating that the wine is red. The actual observations show that the wine color is indeed red for the first six observations.
+
+
+```{r, echo=FALSE}
+wines.pred = rep('red',length(test))
+wines.pred[wines.prob >0.5] ='white'
+table(wines.pred,wines[test,]$color) 
+```
+
+```{r, echo=FALSE}
+# what is our misclassification rate? 
+1-mean(wines.pred == wines[test,]$color)
+```
+
+Missclassification error: 2.1%
+
+```{r, echo=FALSE}
+# what is our correct classification rate? 
+mean(wines.pred == wines[test,]$color)
+```
+
+```{r, echo=FALSE}
+# misclassification rate for red wine
+35/(35+764)
+```
+
+```{r, echo=FALSE}
+# misclassification rate for white wine
+34/(34+2416)
+```
+
+The misclassification rate is very slightly higher for red wine than white. This could be due to the fact that white wine observations more than triple the red wine observations in the test set. If the difference was significant enough, we could adjust the threshold to improve the classification of red wine.
+
+
+```{r, echo=FALSE}
+table(wines[test,]$color)
+```
+
+
+
+
+
+
+
+
+
+
