@@ -64,23 +64,61 @@ head(wines)
 contrasts(wines$color)
 ```
 
+
+### Logistic regression with all predictors
 ```{r, echo=FALSE}
-wines.fit = glm(color~chlorides+volatile.acidity+total.sulfur.dioxide+density,data=wines,subset=train,family='binomial')
+wines.fit1 = glm(color~.,data=wines,subset=train,family='binomial')
+
+#train logistic model on training set with all predictors
+```
+
+```{r, echo=FALSE}
+summary(wines.fit1)
+head(wines.fit1$fitted.values)
+head(wines[train,])
+```
+
+volatile.acidity, residual.sugar, chlorides, free.sulfur.dioxide, total.sulfur.dioxide, density, sulphates and alcohol are all significant at alpha = 0.05
+
+
+```{r, echo=FALSE}
+wines.prob1 = predict(wines.fit1,wines[test,],type='response') 
+head(wines.prob1)
+head(wines[test,])
+```
+
+```{r, echo=FALSE}
+wines.pred1 = rep('red',length(test))
+wines.pred1[wines.prob1 >0.5] ='white'
+table(wines.pred1,wines[test,]$color) 
+```
+
+```{r, echo=FALSE}
+# what is our misclassification rate? 
+1-mean(wines.pred1 == wines[test,]$color)
+```
+
+Misclassification rate is 0.7%
+
+
+### Logistic regression with select predictors
+```{r, echo=FALSE}
+wines.fit2 = glm(color~chlorides+volatile.acidity+total.sulfur.dioxide+density,data=wines,subset=train,family='binomial')
 
 #train logistic model on training set with selected predictors
 ```
 
 ```{r, echo=FALSE}
-summary(wines.fit)
-head(wines.fit$fitted.values)
+summary(wines.fit2)
+head(wines.fit2$fitted.values)
 head(wines[train,])
 ```
 
 All of the predictors are statistically significant at alpha = 0.05
 
 ```{r, echo=FALSE}
-wines.prob = predict(wines.fit,wines[test,],type='response') 
-head(wines.prob)
+wines.prob2 = predict(wines.fit2,wines[test,],type='response') 
+head(wines.prob2)
 head(wines[test,])
 ```
 
@@ -88,21 +126,21 @@ The predicted probabilities are close to zero, indicating that the wine is red. 
 
 
 ```{r, echo=FALSE}
-wines.pred = rep('red',length(test))
-wines.pred[wines.prob >0.5] ='white'
-table(wines.pred,wines[test,]$color) 
+wines.pred2 = rep('red',length(test))
+wines.pred2[wines.prob2 >0.5] ='white'
+table(wines.pred2,wines[test,]$color) 
 ```
 
 ```{r, echo=FALSE}
 # what is our misclassification rate? 
-1-mean(wines.pred == wines[test,]$color)
+1-mean(wines.pred2 == wines[test,]$color)
 ```
 
-Missclassification error: 2.1%
+Misclassification error: 2.1%
 
 ```{r, echo=FALSE}
 # what is our correct classification rate? 
-mean(wines.pred == wines[test,]$color)
+mean(wines.pred2 == wines[test,]$color)
 ```
 
 ```{r, echo=FALSE}
