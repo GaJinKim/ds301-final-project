@@ -11,33 +11,36 @@ library(dplyr)
 library(caret)
 library(MASS)
 library(class)
+library(ggplot2)
+library(tidyr)
 ```
 
 # KNN Red Whine
 ```{r}
+set.seed(9)
 red <- read.csv("winequality-red.csv")
 
 red$newquality <- with(red, ifelse(quality > 6, 'great',
                             ifelse(quality > 4, 'good', 'bad')))
 
 red <- subset(red, select = -c(quality))
-numruns <- 50
+numruns <- 200
 folds <- rep(0, 5)
 K = c(1,3,5,7,9) 
 
+test = sample(1:dim(red)[1], 200, replace=FALSE)
+
+standardized.X = scale(red[,-dim(red)[2]])
+
+train.X = standardized.X[-test,]
+test.X = standardized.X[test,]
+train.Y = red$newquality[-test]
+test.Y = red$newquality[test]
+
+red2 = red[-test,]
+standardized.X2 = scale(red2[,-dim(red2)[2]])
+
 for (i in 1:numruns) {
-  test = sample(1:dim(red)[1], 200, replace=FALSE)
-  
-  standardized.X = scale(red[,-dim(red)[2]])
-  
-  train.X = standardized.X[-test,]
-  test.X = standardized.X[test,]
-  train.Y = red$newquality[-test]
-  test.Y = red$newquality[test]
-  
-  red2 = red[-test,]
-  standardized.X2 = scale(red2[,-dim(red2)[2]])
-  
   flds <- createFolds(red2$newquality, k = 5, list = TRUE, returnTrain = FALSE)
   
   cv_error = matrix(NA, 5, length(K))
@@ -61,6 +64,7 @@ for (i in 1:numruns) {
   folds[best] = folds[best] + 1
 }
 
+folds
 knn.pred = knn(train.X, test.X, train.Y,k=K[which.max(folds)])
 table(knn.pred,test.Y)
 1 - mean(test.Y!=knn.pred)
@@ -75,21 +79,22 @@ white$newquality <- with(white, ifelse(quality > 6, 'great',
                             ifelse(quality > 4, 'good', 'bad')))
 
 white <- subset(white, select = -c(quality))
+numruns <- 50
 folds <- rep(0, 5)
 
+test = sample(1:dim(white)[1], 600, replace=FALSE)
+
+standardized.X = scale(white[,-dim(white)[2]])
+
+train.X = standardized.X[-test,]
+test.X = standardized.X[test,]
+train.Y = white$newquality[-test]
+test.Y = white$newquality[test]
+
+white2 = white[-test,]
+standardized.X2 = scale(white2[,-dim(white2)[2]])
+  
 for (i in 1:numruns) {
-  test = sample(1:dim(white)[1], 600, replace=FALSE)
-  
-  standardized.X = scale(white[,-dim(white)[2]])
-  
-  train.X = standardized.X[-test,]
-  test.X = standardized.X[test,]
-  train.Y = white$newquality[-test]
-  test.Y = white$newquality[test]
-  
-  white2 = white[-test,]
-  standardized.X2 = scale(white2[,-dim(white2)[2]])
-  
   flds <- createFolds(white2$newquality, k = 5, list = TRUE, returnTrain = FALSE)
   
   cv_error = matrix(NA, 5, length(K))
@@ -113,9 +118,22 @@ for (i in 1:numruns) {
   folds[best] = folds[best] + 1
 }
 
+folds
 knn.pred = knn(train.X,test.X,train.Y,k=K[which.max(folds)])
 table(knn.pred,test.Y)
 1 - mean(test.Y!=knn.pred)
+```
+
+```{r}
+plot(red$citric.acid, red$chlorides, col = ifelse(
+  red$newquality == "good", "brown3", ifelse(
+    red$newquality == "great", "blue", "limegreen"
+  )
+))
+
+ggplot(gather(subset(red, select = c(-newquality))), aes(value)) +
+  geom_histogram(bins = 15) +
+  facet_wrap(~key, scales = 'free_x')
 ```
 
 # QNN
