@@ -1,0 +1,139 @@
+---
+title: 'DS301: Final Report'
+author: "Team GAME: MyTien Kien, Emily Pollock, Aaron Hanrahan, Gajin Kim"
+date: "5/8/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup2, include=FALSE}
+library(ggplot2)
+library(ISLR2)
+library(MASS)
+
+#loading in red and white wine datasets
+red <- read.csv("./winequality-red.csv", header=TRUE)
+white <- read.csv("./winequality-white.csv", header=TRUE)
+
+#for question 1 - bad good great factors
+
+
+#for question 2
+red$color = "red"
+white$color = "white"
+```
+
+### Initial Exploratory Analysis
+```{r}
+#correlation matrix
+
+```
+
+```{r}
+#key variables between red and white wines
+
+```
+
+
+### Question 1: *Can we predict red and white wine quality based on their characteristics?*
+#### Method 1 - KNN
+```{r}
+
+```
+\
+
+#### Method 2 - QDA
+```{r}
+
+```
+\
+
+
+### Question 2: *Can we try to predict wine color based on the characteristics?*
+#### Method 1 - Logistic Regression
+```{r}
+
+```
+\
+
+#### Method 2 - LDA
+```{r method2setup, warning=FALSE}
+#transforming the predictor variables for red
+#NOT including total.sulfur.dioxide, residual.sugar, and alcohol
+q2red <- red[,c(1, 2, 3, 5, 6, 8, 9, 10, 12, 13)]
+q2red$fixed.acidity <- log10(q2red$fixed.acidity)
+q2red$volatile.acidity <- log10(q2red$volatile.acidity)
+q2red$citric.acid <- sqrt(q2red$citric.acid)
+q2red$chlorides <- log10(q2red$chlorides)
+q2red$pH <- log10(q2red$pH)
+q2red$sulphates <- log10(q2red$sulphates)
+q2red$free.sulfur.dioxide <- sqrt(q2red$free.sulfur.dioxide)
+q2red$density <- sqrt(q2red$density)
+
+#transforming the predictor variables for white
+#NOT including total.sulfur.dioxide, residual.sugar, and alcohol
+q2white <- white[,c(1, 2, 3, 5, 6, 8, 9, 10, 12, 13)]
+q2white$fixed.acidity <- log10(q2white$fixed.acidity)
+q2white$volatile.acidity <- log10(q2white$volatile.acidity)
+q2white$citric.acid <- sqrt(q2white$citric.acid)
+q2white$chlorides <- log10(q2white$chlorides)
+q2white$pH <- log10(q2white$pH)
+q2white$sulphates <- log10(q2white$sulphates)
+q2white$free.sulfur.dioxide <- sqrt(q2white$free.sulfur.dioxide)
+q2white$density <- sqrt(q2white$density)
+
+#joining the 2 datasets
+q2m2_wines <- rbind(q2red, q2white)
+q2m2_wines$color = as.factor(q2m2_wines$color)
+
+#red wine covariance matrix
+cov(q2red[,-10])
+
+#white wine covariance matrix
+cov(q2white[,-10])
+```
+
+
+```{r}
+#this is the lda analysis against all valid predictors
+set.seed(1)
+train = sample(1:dim(q2m2_wines)[1], dim(q2m2_wines)[1]/2, replace=FALSE)
+test = q2m2_wines[-train,]
+
+lda.fit = lda(color~., data=q2m2_wines, subset=train)
+lda.pred = predict(lda.fit, test)
+
+lda.fit
+head(lda.pred$class)
+
+#confusion matrix
+table(lda.pred$class, test$color)
+
+#misclassification rate of 1.7% 
+mean(lda.pred$class != test$color)
+```
+\
+
+```{r}
+#performing lda on predictors that differs white wine between red
+set.seed(1)
+lda.fit = lda(color~chlorides+volatile.acidity+free.sulfur.dioxide+density, data=q2m2_wines, subset=train)
+lda.pred = predict(lda.fit, test)
+
+lda.fit
+head(lda.pred$class)
+
+#confusion matrix
+table(lda.pred$class, test$color)
+
+#misclassification rate of 2.4% 
+mean(lda.pred$class != test$color)
+```
+\
+
+
+
+
